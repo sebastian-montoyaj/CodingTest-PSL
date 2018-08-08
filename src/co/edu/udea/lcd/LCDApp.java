@@ -19,7 +19,7 @@ import co.edu.udea.exception.LCDException;
 public class LCDApp
 {
 	// Constante que indica cual es el comando para terminar/cerrar el aplicativo
-	static final String CADENA_FINAL = "0,0";
+	private static final String CADENA_FINAL = "0,0";
 	
 	/**
 	 * Metodo de ejecucion principal el cual sirve como punto de entrada a la aplicacion
