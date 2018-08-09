@@ -6,6 +6,6 @@ Repositorio para la prueba de habilidades de codificacion.
 
 ***
 ## Responsable:
-+ Sebastián Montoya Jiménez ~ sebastian.montoyaj@udea.edu.co
+Sebastián Montoya Jiménez ~ sebastian.montoyaj@udea.edu.co
 
 ***
