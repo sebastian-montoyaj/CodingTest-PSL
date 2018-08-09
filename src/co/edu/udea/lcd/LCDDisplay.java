@@ -13,11 +13,11 @@ public class LCDDisplay
 {
 	// --------- CONSTANTES ---------
 	
-	static final String CARACTER_SEPARADOR = ","; // Constante que define el caracter que separa el tamaño de los digitos del numero a imprimir
-	static final String CARACTER_VERTICAL = "|"; // Constante que define el caracter vertical de los digitos a imprimir
-    static final String CARACTER_HORIZONTAL = "-"; // Constante que define el caracter horizontal de los digitos a imprimir
-    static final int COORDENADA_Y = 0; // Constante que nos ayudara a asociar el indice 0 de los puntos de referencia con las filas o eje Y
-    static final int COORDENADA_X = 1; // Constante que nos ayudara a asociar el indice 1 de los puntos de referencia con las columnas o eje X
+	private static final String CARACTER_SEPARADOR = ","; // Constante que define el caracter que separa el tamaño de los digitos del numero a imprimir
+	private static final String CARACTER_VERTICAL = "|"; // Constante que define el caracter vertical de los digitos a imprimir
+	private static final String CARACTER_HORIZONTAL = "-"; // Constante que define el caracter horizontal de los digitos a imprimir
+	private static final int COORDENADA_Y = 0; // Constante que nos ayudara a asociar el indice 0 de los puntos de referencia con las filas o eje Y
+	private static final int COORDENADA_X = 1; // Constante que nos ayudara a asociar el indice 1 de los puntos de referencia con las columnas o eje X
     
     // --------- VARIABLES ----------
     
@@ -94,6 +94,8 @@ public class LCDDisplay
     			break;
     		case 7: // Si el segmento a agregar es el 7 entonces se adiciona una (o varias) lineas horizontales a la derecha de la EsquinaInferiorIzquierda
     			adicionarLinea(posicionEsquinaInferiorIzquierda, CARACTER_HORIZONTAL);
+    			break;
+    		default:
     			break;
 			}
     	}
@@ -329,7 +331,7 @@ public class LCDDisplay
     * @param cadenaAEstudiar Cadena de caracteres que se va a analizar para verificar si es un numero o no
     * @return Se retorna VERDADERO en caso que la cadena si sea un numero y FALSO en caso contario
     */
-   static boolean esNumero(String cadenaAEstudiar)
+   public static boolean esNumero(String cadenaAEstudiar)
    {
        try // Se intenta ...
        {
