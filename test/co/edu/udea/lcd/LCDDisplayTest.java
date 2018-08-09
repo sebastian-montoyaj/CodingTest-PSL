@@ -37,7 +37,7 @@ public class LCDDisplayTest
 		}
 		catch (LCDException e)
 		{
-			assertEquals("El comando 4, no tiene el formato tamaño,numeroAImprimir", e.getMessage()); // Pasa si detecta que el comando no esta bien formateado
+			assertEquals("El comando 4, no tiene el formato Size,NumberToPrint", e.getMessage()); // Pasa si detecta que el comando no esta bien formateado
 		}
 	}
 	

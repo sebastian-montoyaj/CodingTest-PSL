@@ -292,7 +292,7 @@ public class LCDDisplay
     	if (parametrosComando.length != 2)
     	{
     		// Lanzamos una excepcion al respecto
-    		throw new LCDException(String.format("El comando %s no tiene el formato tamaño,numeroAImprimir", comandoADibujar));
+    		throw new LCDException(String.format("El comando %s no tiene el formato Size,NumberToPrint", comandoADibujar));
     	}
     	
     	// Si pasa aqui es porque el comando si tiene el formato indicado y se procede a ...
