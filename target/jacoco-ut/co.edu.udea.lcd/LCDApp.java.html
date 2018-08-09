@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>LCDApp.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">CodingTest-PSL</a> &gt; <a href="index.source.html" class="el_package">co.edu.udea.lcd</a> &gt; <span class="el_source">LCDApp.java</span></div><h1>LCDApp.java</h1><pre class="source lang-java linenums">package co.edu.udea.lcd;
+
+// Importes necesarios para que la clase funcione
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Scanner;
+import co.edu.udea.lcd.LCDDisplay;
+import co.edu.udea.exception.LCDException;
+
+/**
+ * Clase principal del aplicativo, la cual se encarga de tomar los comandos que
+ * el usuario ingresa, los revisa y los pasa de la forma adecuada a un objeto
+ * del tipo LCDDisplay para que los muestre por consola.
+ * @author Sebastian Montoya Jimenez
+ * @version 1.0.0
+ * @since 07/08/2018
+ */
+<span class="nc" id="L19">public class LCDApp</span>
+{
+	// Constante que indica cual es el comando para terminar/cerrar el aplicativo
+	private static final String CADENA_FINAL = &quot;0,0&quot;;
+	
+	/**
+	 * Metodo de ejecucion principal el cual sirve como punto de entrada a la aplicacion
+	 * @param args Permite la recepcion de argumentos por consola. En si no se utiliza, pero Java lo exige para la correcta ejecucion del aplicativo.
+	 * @throws LCDException Esto permite lanzar las excepciones personalizadas para este aplicativo
+	 */
+	public static void main(String[] args) throws LCDException
+	{
+		// En primer lugar se proceden a crear las variables y objetos que necesita el aplicativo
+<span class="nc" id="L32">        List&lt;String&gt; listaComando = new ArrayList&lt;&gt;(); // Variable en donde se almacenaran cada uno de los comandos que indique el usuario</span>
+        String comando; // Variable auxiliar en donde se recibira de manera temporal lo que ingrese el usuario para analizarlo
+        int espacioEntreDigitos; // Variable para almacenar el numero de espacios a guardar entre digitos. Rango: [0,5]
+<span class="nc" id="L35">        LCDDisplay pantallaLCD = new LCDDisplay(); // Objeto LCDDisplay con el cual procesaremos y mostraremos los digitos que ingreso el usuario</span>
+<span class="nc" id="L36">        Scanner lector = new Scanner(System.in); // Y se crea un objeto scanner el cual estara pendiente de lo que sucede en la consola</span>
+        
+        try // Ahora, se intenta ...
+        {
+	        // Solicitar al usuario cuantos espacios desea dejar entre cada digito
+<span class="nc" id="L41">	        System.out.print(&quot;Espacio entre Digitos (0 a 5): &quot;);</span>
+	        
+	        // Y esperemos que ingrese dicho valor
+<span class="nc" id="L44">	        comando = lector.next();</span>
+	        
+	        // Si lo que ingreso el usuario NO es un numero entonces ...
+<span class="nc bnc" id="L47" title="All 2 branches missed.">	        if (!LCDDisplay.esNumero(comando))</span>
+	        {
+	        	// Lanzamos la excepcion correspondiente
+<span class="nc" id="L50">	        	throw new LCDException(String.format(&quot;La cadena %s no es un numero entero&quot;, comando));</span>
+	        }
+	        
+	        // Luego si pasa aqu�, entonces inicializamos la variable espacioEntreDigitos con el numero que dio el usuario
+<span class="nc" id="L54">	        espacioEntreDigitos = Integer.parseInt(comando);</span>
+	        
+	        // A continuacion, Si el numero ingresado no esta dentro del rango esperado (menor a 0 o mayor a 5) entonces ...
+<span class="nc bnc" id="L57" title="All 4 branches missed.">	        if (espacioEntreDigitos &lt; 0 || espacioEntreDigitos &gt; 5)</span>
+	        {
+	        	// Lanzamos la excepcion correspondiente
+<span class="nc" id="L60">	        	throw new LCDException(&quot;El espacio entre digitos debe estar entre 0 y 5&quot;);</span>
+	        }
+	        
+	        // Si el numero ingresado si estaba en el rango correcto entonces se procede a...
+	        do
+	        {
+<span class="nc" id="L66">	            System.out.print(&quot;Entrada: &quot;); // Solicitar el comando que se desea imprimir</span>
+<span class="nc" id="L67">	            comando = lector.next(); // y se espera a que el usuario termine de ingresarlo</span>
+	            
+	            // Una vez se confirma el comando, Si este es diferente del comando de finalizacion entonces
+<span class="nc bnc" id="L70" title="All 2 branches missed.">	            if(!CADENA_FINAL.equals(comando))</span>
+	            {
+<span class="nc" id="L72">	                listaComando.add(comando); // Se a�ade este a la lista de comandos a imprimir</span>
+	            }
+<span class="nc bnc" id="L74" title="All 2 branches missed.">	        } while (!CADENA_FINAL.equals(comando)); // Ahora, mientras no se haya ingresado el comando de finalizacion se procedera a solicitar el siguiente comando</span>
+	        
+	        
+	        // Una vez que el usuario ha terminado de registrar todos sus comandos se procede a ...
+	        
+	        // Crear una variable Iterator con la cual recorreremos todos los comandos registrados
+<span class="nc" id="L80">	        Iterator&lt;String&gt; iteratorComandos = listaComando.iterator();</span>
+	        
+	        // Ahora, mientras todavia hayan comandos por mostrar ...
+<span class="nc bnc" id="L83" title="All 2 branches missed.">	        while (iteratorComandos.hasNext()) </span>
+	        {
+	        	// Se presentara el numero dado con las dimensiones y espacios especificados
+<span class="nc" id="L86">	        	pantallaLCD.procesarComando(iteratorComandos.next(), espacioEntreDigitos);</span>
+	        }
+<span class="nc" id="L88">        }</span>
+<span class="nc" id="L89">        catch (LCDException e) // En caso de error ...</span>
+        {
+        	// Se imprime por consola el error que fue causa de la excepcion y en el cual incidio el usuario
+<span class="nc" id="L92">        	System.out.println(e.getMessage());</span>
+		}
+        finally // Finalmente, cerramos la comunicacion del objeto scanner e imprimimos un mensaje para advertir de la terminacion del programa
+<span class="nc" id="L95">        {</span>
+<span class="nc" id="L96">        	lector.close();</span>
+<span class="nc" id="L97">        	System.out.println(&quot;---- FIN de LCDApp ----&quot;);</span>
+<span class="nc" id="L98">        }</span>
+<span class="nc" id="L99">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
