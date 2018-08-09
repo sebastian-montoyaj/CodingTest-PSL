@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>LCDDisplay.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">CodingTest-PSL</a> &gt; <a href="index.source.html" class="el_package">co.edu.udea.lcd</a> &gt; <span class="el_source">LCDDisplay.java</span></div><h1>LCDDisplay.java</h1><pre class="source lang-java linenums">package co.edu.udea.lcd;
+
+//Importes necesarios para que la clase funcione
+import co.edu.udea.exception.LCDException;
+
+/**
+ * Clase encargada de manejar toda la logica y metodos de la pantalla LCD
+ * @author Sebastian Montoya Jimenez
+ * @version 1.0.0
+ * @since 07/08/2018
+ */
+<span class="fc" id="L12">public class LCDDisplay</span>
+{
+	// --------- CONSTANTES ---------
+	
+	private static final String CARACTER_SEPARADOR = &quot;,&quot;; // Constante que define el caracter que separa el tamaño de los digitos del numero a imprimir
+	private static final String CARACTER_VERTICAL = &quot;|&quot;; // Constante que define el caracter vertical de los digitos a imprimir
+	private static final String CARACTER_HORIZONTAL = &quot;-&quot;; // Constante que define el caracter horizontal de los digitos a imprimir
+	private static final int COORDENADA_Y = 0; // Constante que nos ayudara a asociar el indice 0 de los puntos de referencia con las filas o eje Y
+	private static final int COORDENADA_X = 1; // Constante que nos ayudara a asociar el indice 1 de los puntos de referencia con las columnas o eje X
+    
+    // --------- VARIABLES ----------
+    
+    private int tamanoDigitos; // Variable que almacenara el tamaño que deberan tener los digitos
+    private int espacioEntreDigitos; // Variable que guardara el numero de espacios a reservar entre digitos
+    private int filasPorDigito; // Variable que guardara el numero de filas que se utilizaran en la impresion de cada digito
+    private int columnasPorDigito; // Variable que guardara el numero de columnas que se utilizaran en la impresion de cada digito
+    private int totalFilas; // Variable que tendra el total de filas que necesita la impresion del numero
+    private int totalColumnas; // Variable que tendra el total de columnas que necesita la impresion del numero
+    private String[][] matrizDeImpresion; // Variable en donde se ira construyendo la representación del numero a estilo de pantalla LCD
+    
+    // Las siguientes variables se usan como puntos coordenada que nos ayudaran en el dibujado de los caracteres que representaran cada uno de los digitos del numero a imprimir
+<span class="fc" id="L33">    private int[] posicionEsquinaSuperiorIzquierda = new int[2];</span>
+<span class="fc" id="L34">    private int[] posicionCentroMedioIzquierdo = new int[2];</span>
+<span class="fc" id="L35">    private int[] posicionEsquinaInferiorIzquierda = new int[2];</span>
+<span class="fc" id="L36">    private int[] posicionCentroMedioDerecha = new int[2];</span>
+<span class="fc" id="L37">    private int[] posicionEsquinaSuperiorDerecha = new int[2];</span>
+    
+    // --------- METODOS ------------
+    
+    /**
+     * Metodo encargado de añadir (dibujar) una linea a la matriz de Impresion
+     * @param puntoReferencia Par de coordenadas que sirven de referencia para saber desde donde imprimir la linea
+     * @param caracterADibujar Caracter de dibujo que se quiere utilizar para el segmento a dibujar. Tambien nos servira para saber en que sentido dibujar dichas lineas
+     */
+    private void adicionarLinea(int[] puntoReferencia, String caracterADibujar)
+    {
+    	// Ahora, dependiendo del tamaño del digito (o visto de otra forma, del tamaño de segmento) se procede a...
+<span class="fc bfc" id="L49" title="All 2 branches covered.">    	for (int i = 1; i &lt;= tamanoDigitos; i++)</span>
+    	{
+    		// Si el caracter a dibujar es el caracter horizontal entonces
+<span class="fc bfc" id="L52" title="All 2 branches covered.">    		if (CARACTER_HORIZONTAL.equals(caracterADibujar))</span>
+    		{
+<span class="fc" id="L54">    			int posicionAuxiliarX = puntoReferencia[COORDENADA_X] + i; // Calculamos el desfase a derecha en donde se debe situar el caracter horizontal i</span>
+<span class="fc" id="L55">    			matrizDeImpresion[puntoReferencia[COORDENADA_Y]][posicionAuxiliarX] = caracterADibujar; // Y quemamos/dibujamos tal caracter en la posicion Y del punto de referencia (la cual es constante) y en la posicion X que acabamos de calcular</span>
+<span class="fc" id="L56">    		}</span>
+    		else // Sino es porque se quiere emplear el caracter vertical por lo que
+    		{
+<span class="fc" id="L59">    			int posicionAuxiliarY = puntoReferencia[COORDENADA_Y] + i; // Esta vez se calcula el desfase hacia abajo de donde se debe situar el caracter vertical i</span>
+<span class="fc" id="L60">    			matrizDeImpresion[posicionAuxiliarY][puntoReferencia[COORDENADA_X]] = caracterADibujar; // Y quemamos/dibujamos tal caracter en la posicion Y calculada previamente y en la posicion X del punto de referencia (la cual esta vez es la constante)</span>
+    		}
+    	}
+<span class="fc" id="L63">    }</span>
+    
+    /**
+     * Metodo encargado de ir ubicando los segmentos de un numero dado en la matriz de impresion
+     * @param listaSegmentos Arreglo que contiene los segmentos especificos que se deben adicionar a la matriz de impresion para formar el digito en esta
+     */
+    private void adicionarSegmentos(int[] listaSegmentos)
+    {
+    	// Entonces, por cada segmento de la lista se procede a ...
+<span class="fc bfc" id="L72" title="All 2 branches covered.">    	for (int seg : listaSegmentos)</span>
+    	{
+    		// Adicionar el caracter requerido segun el numero asociado al segmento, por lo tanto:
+<span class="pc bpc" id="L75" title="1 of 8 branches missed.">    		switch (seg)</span>
+    		{
+    		case 1: // Si el segmento a agregar es el 1 entonces se adiciona una (o varias) lineas verticales debajo de la EsquinaSuperiorIzquierda
+<span class="fc" id="L78">    			adicionarLinea(posicionEsquinaSuperiorIzquierda, CARACTER_VERTICAL);</span>
+<span class="fc" id="L79">    			break;</span>
+    		case 2: // Si el segmento a agregar es el 2 entonces se adiciona una (o varias) lineas verticales debajo del CentroMedioIzquierdo
+<span class="fc" id="L81">    			adicionarLinea(posicionCentroMedioIzquierdo, CARACTER_VERTICAL);</span>
+<span class="fc" id="L82">    			break;</span>
+    		case 3: // Si el segmento a agregar es el 3 entonces se adiciona una (o varias) lineas verticales debajo de la EsquinaSuperiorDerecha
+<span class="fc" id="L84">    			adicionarLinea(posicionEsquinaSuperiorDerecha, CARACTER_VERTICAL);</span>
+<span class="fc" id="L85">    			break;</span>
+    		case 4: // Si el segmento a agregar es el 4 entonces se adiciona una (o varias) lineas verticales debajo del CentroMedioDerecha
+<span class="fc" id="L87">    			adicionarLinea(posicionCentroMedioDerecha, CARACTER_VERTICAL);</span>
+<span class="fc" id="L88">    			break;</span>
+    		case 5: // Si el segmento a agregar es el 5 entonces se adiciona una (o varias) lineas horizontales a la derecha de la EsquinaSuperiorIzquierda
+<span class="fc" id="L90">    			adicionarLinea(posicionEsquinaSuperiorIzquierda, CARACTER_HORIZONTAL);</span>
+<span class="fc" id="L91">    			break;</span>
+    		case 6: // Si el segmento a agregar es el 6 entonces se adiciona una (o varias) lineas horizontales a la derecha del CentroMedioIzquierdo
+<span class="fc" id="L93">    			adicionarLinea(posicionCentroMedioIzquierdo, CARACTER_HORIZONTAL);</span>
+<span class="fc" id="L94">    			break;</span>
+    		case 7: // Si el segmento a agregar es el 7 entonces se adiciona una (o varias) lineas horizontales a la derecha de la EsquinaInferiorIzquierda
+<span class="fc" id="L96">    			adicionarLinea(posicionEsquinaInferiorIzquierda, CARACTER_HORIZONTAL);</span>
+<span class="fc" id="L97">    			break;</span>
+    		default:
+    			break;
+			}
+    	}
+<span class="fc" id="L102">    }</span>
+    
+    /**
+     * Metodo encargado de definir los segmentos que componen un digito y a partir de los segmentos adicionar la representacion del digito a la matriz
+     * @param numero Digito a agregar a la matriz de impresion
+     */
+    // Tomando el 8 como ejemplo, los segmentos basicos para construir todos los digitos estan asignados de la siguiente forma:
+    //       ── &lt;5
+    //  1&gt; |    | &lt;3
+    //       ── &lt;6
+    //  2&gt; |    | &lt;4
+    //       ── &lt;7
+    private void adicionarDigito(char numero)
+    {
+    	// Para empezar, creamos un arreglo en el cual depositaremos cuales son los segmentos necesarios para construir el digito
+        int[] listaSegmentos;
+        
+        // Ahora y dependiendo del numero que entro se inicializa la lista segmentos, por lo tanto ...
+<span class="pc bpc" id="L120" title="1 of 11 branches missed.">        switch (numero)</span>
+        {
+            case '1': // Si el numero a procesar es el 1 entonces se agregan los segmentos 3 y 4
+<span class="fc" id="L123">            	listaSegmentos = new int[] {3,4};</span>
+<span class="fc" id="L124">                break;</span>
+            case '2': // Si el numero a procesar es el 2 entonces se agregan los segmentos 5, 3, 6, 2 y 7
+<span class="fc" id="L126">            	listaSegmentos = new int[] {5,3,6,2,7};</span>
+<span class="fc" id="L127">                break;</span>
+            case '3': // Si el numero a procesar es el 3 entonces se agregan los segmentos 5, 3, 6, 4 y 7
+<span class="fc" id="L129">            	listaSegmentos = new int[] {5,3,6,4,7};</span>
+<span class="fc" id="L130">                break;</span>
+            case '4': // Si el numero a procesar es el 4 entonces se agregan los segmentos 1, 6, 3 y 4
+<span class="fc" id="L132">            	listaSegmentos = new int[] {1,6,3,4};</span>
+<span class="fc" id="L133">                break;</span>
+            case '5': // Si el numero a procesar es el 5 entonces se agregan los segmentos 5, 1, 6, 4 y 7
+<span class="fc" id="L135">            	listaSegmentos = new int[] {5,1,6,4,7};</span>
+<span class="fc" id="L136">                break;</span>
+            case '6': // Si el numero a procesar es el 6 entonces se agregan los segmentos 5, 1, 6, 2, 7 y 4
+<span class="fc" id="L138">            	listaSegmentos = new int[] {5,1,6,2,7,4};</span>
+<span class="fc" id="L139">                break;</span>
+            case '7': // Si el numero a procesar es el 7 entonces se agregan los segmentos 5, 3 y 4
+<span class="fc" id="L141">            	listaSegmentos = new int[] {5,3,4};</span>
+<span class="fc" id="L142">                break;</span>
+            case '8': // Si el numero a procesar es el 8 entonces se agregan los segmentos 1, 2, 3, 4, 5, 6 y 7
+<span class="fc" id="L144">            	listaSegmentos = new int[] {1,2,3,4,5,6,7};</span>
+<span class="fc" id="L145">                break;</span>
+            case '9': // Si el numero a procesar es el 9 entonces se agregan los segmentos 1, 3, 4, 5, 6 y 7
+<span class="fc" id="L147">            	listaSegmentos = new int[] {1,3,4,5,6,7};</span>
+<span class="fc" id="L148">                break;</span>
+            case '0': // Si el numero a procesar es el 10 entonces se agregan los segmentos 1, 2, 3, 4, 5 y 7
+<span class="fc" id="L150">            	listaSegmentos = new int[] {1,2,3,4,5,7};</span>
+<span class="fc" id="L151">                break;</span>
+            default: // Para cualquier otro caso que no sea un numero entonces se agregan los segmentos 5, 1, 6, 2 y 7. Estos segmentos forman una E que denotaria ERROR!
+<span class="nc" id="L153">            	listaSegmentos = new int[] {5,1,6,2,7};</span>
+                break;
+        }
+        
+        // Para terminar, se invoca el metodo adicionarSegmentos para agregar/dibujar dichos segmentos a la matriz de impresion
+<span class="fc" id="L158">        adicionarSegmentos(listaSegmentos);</span>
+<span class="fc" id="L159">    }</span>
+    
+    /**
+     * Metodo encargado de imprimir el numero especificado
+     * @param numeroAImprimir Numero en cuestion a imprimir
+     * @throws LCDException Esto permite lanzar las excepciones personalizadas para este aplicativo
+     */
+    private void imprimirNumero(String numeroAImprimir) throws LCDException
+    {
+    	// Antes de empezar a imprimir el numero vamos a realizar los siguientes preparativos:
+    	
+    	// Primero, se calcula el numero de filas que tendra cada digito. El cual al mismo tiempo va a ser el valor total de filas que van a ser necesarias para la impresion de todo el numero
+<span class="fc" id="L171">    	filasPorDigito = totalFilas = (2 * tamanoDigitos) + 3;</span>
+    	
+    	// Segundo, se calcula el numero de columnas que tendra cada digito
+<span class="fc" id="L174">    	columnasPorDigito = tamanoDigitos + 2;</span>
+    	
+    	// Tercero, a diferencia del numero total de filas, el numero total de columnas es igual a: El numero de digitos a imprimir X (El numero de columnas que consume cada numero + El espacio que se debe dejar con respecto al siguiente digito)
+<span class="fc" id="L177">    	totalColumnas = numeroAImprimir.length() * (columnasPorDigito + espacioEntreDigitos);</span>
+    	
+    	// Y cuarto, se instancia e inicializa la matriz de impresion del numero. En esta matriz es donde se &quot;dibujaran&quot; los caracteres que daran forma al numero
+<span class="fc" id="L180">    	matrizDeImpresion = new String[totalFilas][totalColumnas];</span>
+<span class="fc bfc" id="L181" title="All 2 branches covered.">    	for (int i = 0; i &lt; totalFilas; i++)</span>
+    	{
+<span class="fc bfc" id="L183" title="All 2 branches covered.">            for (int j = 0; j &lt; totalColumnas; j++)</span>
+            {
+<span class="fc" id="L185">            	matrizDeImpresion[i][j] = &quot; &quot;; // Se inicializa cada celda de esta matriz con &quot; &quot; (espacio) porque si se inicializan las celdas con &quot;&quot; (String vacio) no se lograran los rellenos necesarios para dar forma a los digitos</span>
+            }
+        }
+    	
+    	// A continuación, procedemos a separar los digitos del numero en un arreglo de caracteres
+<span class="fc" id="L190">    	char[] digitos = numeroAImprimir.toCharArray();</span>
+    	
+    	// Y se crea una variable que llamaremos pivoteEnX. Su mision es almacenar la columna desde la cual debera imprimirse cada digito, en otras palabras, es el desfase que se debe generar por cada impresion
+<span class="fc" id="L193">    	int pivoteEnX = 0; // Comienza en cero para que el primer digito inicie desde tal columna</span>
+    	
+    	// Ahora, para cada digito del numero se procede a ...
+<span class="fc bfc" id="L196" title="All 2 branches covered.">    	for (char digito : digitos)</span>
+    	{
+    		// Revisar Si el caracter en cuestion es un digito, sino lo es entonces
+<span class="fc bfc" id="L199" title="All 2 branches covered.">    		if(!Character.isDigit(digito))</span>
+    		{
+    			// Lanzamos la excepcion correspondiente
+<span class="fc" id="L202">        		throw new LCDException(String.format(&quot;El numero %s contiene el caracter '%c', el cual no es un numero!&quot;, numeroAImprimir, digito));</span>
+        		// Nota: Si pasa aqui debe ser porque el numero tiene un caracter de signo (+ o -) al principio y que no es permitido
+    		}
+    		
+    		// Luego, calculamos los puntos de referencia con los cuales nos apoyaremos para la ubicación espacial de los caracteres que representaran el digito dentro de la matriz de impresion
+    		/* Para entender como se calculan estas coordenas, debemos plantearnos unas posiciones relativas que son las siguientes:
+    		 * Esquina Superior Izquierda  ---&gt; La denotaremos: ESI
+    		 * Centro Medio Izquierdo      ---&gt; La denotaremos: CMI
+    		 * Esquina Inferior Izquierda  ---&gt; La denotaremos: EII
+    		 * Esquina Superior Derecha    ---&gt; La denotaremos: ESD
+    		 * Centro Medio Derecho        ---&gt; La denotaremos: CMD
+    		 * 
+    		 * Lo que graficamente se podria ver así:
+    		 * 
+    		 * NOTA: Las Y son las filas y las X son las columnas. Ademas, se asume que el espacio entre digitos es de 1
+    		 * 
+    		 *            1er numero    Espacio   2do numero       ...        Y asi sucesivamente
+    		 *  Columna    0   1   2      3        4   5   6  
+    		 * Fila      +───+───+───+           +───+───+───+                
+    		 *   0       |ESI|   |ESD|    |      |ESI|   |ESD|
+    		 *           +───+───+───+           +───+───+───+
+    		 *   1       |   |   |   |    |      |   |   |   |
+    		 *           +───+───+───+           +───+───+───+
+    		 *   2       |CMI|   |CMD|    |      |CMI|   |CMD|
+    		 *           +───+───+───+           +───+───+───+
+    		 *   3       |   |   |   |    |      |   |   |   |
+    		 *           +───+───+───+           +───+───+───+
+    		 *   4       |EII|   |   |    |      |EII|   |   |
+    		 *           +───+───+───+           +───+───+───+
+    		 *  
+    		 *           pivoteEnX = 0           pivoteEnX = pivoteEnX
+    		 *                                               + columnasPorDigito
+    		 *                                               + espacioEntreDigitos
+    		 *                                             = 4
+    		 *  Notese entonces que las posiciones mencionadas se repiten a ciertos intervalos y esto nos permitira saber desde donde se pueden comenzar a dibujar cada una de las 7 secciones que hay predefinidas para los digitos
+    		 */
+    		
+    		// Cada una de esta posiciones se calcularia asi:
+<span class="fc" id="L240">            posicionEsquinaSuperiorIzquierda[COORDENADA_Y] = 0;</span>
+<span class="fc" id="L241">            posicionEsquinaSuperiorIzquierda[COORDENADA_X] = 0 + pivoteEnX;</span>
+
+<span class="fc" id="L243">            posicionCentroMedioIzquierdo[COORDENADA_Y] = (filasPorDigito / 2);</span>
+<span class="fc" id="L244">            posicionCentroMedioIzquierdo[COORDENADA_X] = 0 + pivoteEnX;</span>
+
+<span class="fc" id="L246">            posicionEsquinaInferiorIzquierda[COORDENADA_Y] = (filasPorDigito - 1);</span>
+<span class="fc" id="L247">            posicionEsquinaInferiorIzquierda[COORDENADA_X] = 0 + pivoteEnX;</span>
+            
+<span class="fc" id="L249">            posicionCentroMedioDerecha[COORDENADA_Y] = (filasPorDigito / 2);</span>
+<span class="fc" id="L250">            posicionCentroMedioDerecha[COORDENADA_X] = (columnasPorDigito - 1) + pivoteEnX;</span>
+
+<span class="fc" id="L252">            posicionEsquinaSuperiorDerecha[COORDENADA_Y] = 0;</span>
+<span class="fc" id="L253">            posicionEsquinaSuperiorDerecha[COORDENADA_X] = (columnasPorDigito - 1) + pivoteEnX;</span>
+            
+            // Una vez se terminan de calcular las posiciones del digito actual, se actualiza la posicion del pivote en X para el siguiente digito a dibujar
+<span class="fc" id="L256">            pivoteEnX = pivoteEnX + columnasPorDigito + espacioEntreDigitos;</span>
+    		
+    		// Ahora, invocamos el metodo adicionarDigito para que este ya se encargue de agregar el digito a la matriz de impresion
+<span class="fc" id="L259">    		adicionarDigito(digito);</span>
+    	}
+    	
+    	// Una vez se terminan de dibujar todos los digitos del numero en memoria (o sea, en la variable matrizDeImpresion) se prosigue con imprimir el numero completo por consola
+<span class="fc bfc" id="L263" title="All 2 branches covered.">    	for (int i = 0; i &lt; totalFilas; i++)</span>
+    	{
+<span class="fc bfc" id="L265" title="All 2 branches covered.">            for (int j = 0; j &lt; totalColumnas; j++)</span>
+            {
+<span class="fc" id="L267">                System.out.print(matrizDeImpresion[i][j]);</span>
+            }
+<span class="fc" id="L269">            System.out.println();</span>
+        }
+<span class="fc" id="L271">    }</span>
+    
+    /**
+     * Metodo encargado de procesar la entrada (comando) que contiene el size del segmento de los digitos y los digitos a imprimir
+     * @param comandoADibujar Entrada que contiene el size del segmento de los digitos y el numero a imprimir
+     * @param espacioEntreDigitos Espacio que se va a dejar entre los digitos
+     * @throws LCDException Esto permite lanzar las excepciones personalizadas para este aplicativo
+     */
+    public void procesarComando(String comandoADibujar, int espacioEntreDigitos) throws LCDException
+    {
+    	// Para empezar, primero revisamos que el comando si tenga el caracter separador. En caso que no, entonces
+<span class="fc bfc" id="L282" title="All 2 branches covered.">    	if (!comandoADibujar.contains(CARACTER_SEPARADOR))</span>
+    	{
+    		// Lanzamos la excepcion correspondiente
+<span class="fc" id="L285">    		throw new LCDException(String.format(&quot;El comando %s no contiene el caracter separador '%s'&quot;, comandoADibujar, CARACTER_SEPARADOR));</span>
+    	}
+    	
+    	// Si pasa la validacion anterior, se separa/tokeniza el comando para facilitar su analisis
+<span class="fc" id="L289">    	String[] parametrosComando = comandoADibujar.split(CARACTER_SEPARADOR);</span>
+    	
+    	// Ahora, si el numero de parametros del comando es diferente de dos entonces este no tiene el formato esperado por lo que
+<span class="fc bfc" id="L292" title="All 2 branches covered.">    	if (parametrosComando.length != 2)</span>
+    	{
+    		// Lanzamos una excepcion al respecto
+<span class="fc" id="L295">    		throw new LCDException(String.format(&quot;El comando %s no tiene el formato tamaño,numeroAImprimir&quot;, comandoADibujar));</span>
+    	}
+    	
+    	// Si pasa aqui es porque el comando si tiene el formato indicado y se procede a ...
+    	
+    	// Revisar que el primer parametro (Size) del comando si sea un numero, sino lo es entonces
+<span class="fc bfc" id="L301" title="All 2 branches covered.">    	if (!esNumero(parametrosComando[0]))</span>
+    	{
+    		// Lanzamos una excepcion al respecto
+<span class="fc" id="L304">    		throw new LCDException(String.format(&quot;El parametro Size [%s] no es un numero&quot;, parametrosComando[0]));</span>
+    	}
+    	
+    	// En caso que si, entonces se castea dicho parametro y se inicializa la variable global tamanoDigitos para que esta clase sepa de ahora en adelante con que tamaño debe imprimir los digitos
+<span class="fc" id="L308">    	tamanoDigitos = Integer.parseInt(parametrosComando[0]);</span>
+    	
+    	// Luego, se valida que el tamaño este dentro del rango esperado, Sino lo esta entonces
+<span class="pc bpc" id="L311" title="1 of 4 branches missed.">    	if(tamanoDigitos &lt;1 || tamanoDigitos &gt;10)</span>
+    	{
+    		// Lanzamos una excepcion al respecto
+<span class="fc" id="L314">    		throw new LCDException(String.format(&quot;El parametro Size [%s] debe estar entre 1 y 10&quot;, parametrosComando[0]));</span>
+    	}
+    	
+    	// Por otra parte, tambien revisamos que el segundo parametro (Number) igualmente sea un numero, en caso de no serlo entonces
+<span class="fc bfc" id="L318" title="All 2 branches covered.">    	if (!esNumero(parametrosComando[1]))</span>
+    	{
+    		// Lanzamos una excepcion al respecto
+<span class="fc" id="L321">    		throw new LCDException(String.format(&quot;El parametro Number [%s] no es un numero&quot;, parametrosComando[1]));</span>
+    	}
+    	
+    	// Finalmente y si se pasaron las validaciones anteriores se procede a ...
+<span class="fc" id="L325">    	this.espacioEntreDigitos = espacioEntreDigitos; // Inicializar la variable global espacioEntreDigitos para que esta clase sepa cuanto espacio respetar entre la impresion de cada digito</span>
+<span class="fc" id="L326">    	imprimirNumero(parametrosComando[1]); // Y se manda a imprimir el numero del comando</span>
+<span class="fc" id="L327">    }</span>
+    
+   /**
+    * Metodo para validar que una cadena de caracteres si corresponde a un numero
+    * @param cadenaAEstudiar Cadena de caracteres que se va a analizar para verificar si es un numero o no
+    * @return Se retorna VERDADERO en caso que la cadena si sea un numero y FALSO en caso contario
+    */
+   public static boolean esNumero(String cadenaAEstudiar)
+   {
+       try // Se intenta ...
+       {
+<span class="fc" id="L338">           Integer.parseInt(cadenaAEstudiar); // Castear la cadena de caracteres a un numero entero</span>
+<span class="fc" id="L339">           return true; // Si pasa el casteo, entonces retorno VERDADERO</span>
+       }
+<span class="fc" id="L341">       catch (NumberFormatException ex) // En caso de error ...</span>
+       {
+<span class="fc" id="L343">           return false; // Retorno FALSO</span>
+       }
+   }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
